@@ -41,22 +41,52 @@ export default function ChatInterface() {
       timestamp: new Date(),
     }
 
-    setMessages(prev => [...prev, userMessage])
+    const updatedMessages = [...messages, userMessage]
+    setMessages(updatedMessages)
     setInput('')
     setIsLoading(true)
 
     try {
-      // 模拟AI响应 - 实际开发中替换为DeepSeek API调用
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // 调用Next.js API路由（代理DeepSeek API）
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: updatedMessages
+            .filter(msg => msg.role !== 'system')
+            .map(msg => ({
+              role: msg.role,
+              content: msg.content
+            })),
+          scenario: 'workplace' // 默认场景，后续可从场景选择器获取
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`API响应错误: ${response.status}`)
+      }
+
+      const data = await response.json()
       
+      if (data.error) {
+        throw new Error(data.error)
+      }
+
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
-        content: `我理解你的观点。在实际沟通中，我们可以尝试更理性的表达方式。比如：\n\n1. 先确认对方的核心诉求\n2. 表达自己的感受而非指责\n3. 提出建设性解决方案\n\n你觉得这样的回应方式如何？`,
+        content: data.message,
         role: 'assistant',
         timestamp: new Date(),
       }
 
       setMessages(prev => [...prev, aiResponse])
+      
+      // 可选：记录token使用情况（用于成本监控）
+      if (data.usage) {
+        console.log('API使用情况:', data.usage)
+      }
     } catch (error) {
       console.error('发送消息失败:', error)
       const errorMessage: Message = {

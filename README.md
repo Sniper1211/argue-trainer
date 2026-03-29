@@ -25,17 +25,22 @@
 
 ## 🚀 技术栈
 
-### 前端
-- **框架**: Next.js 14 (App Router)
-- **UI库**: Tailwind CSS + Shadcn/ui
+### 前端（纯前端架构）
+- **框架**: Next.js 14 (App Router + API Routes)
+- **UI库**: Tailwind CSS + 自定义组件
 - **状态管理**: Zustand
-- **AI集成**: DeepSeek API
+- **AI集成**: DeepSeek API（通过Next.js API Routes代理）
 
-### 后端
-- **运行时**: Node.js + Express (或Next.js API Routes)
-- **数据库**: Supabase (PostgreSQL)
-- **AI服务**: DeepSeek Chat API
-- **部署**: Vercel
+### 部署
+- **托管**: Vercel（免费层）
+- **数据库**: 无（暂不存储用户数据）
+- **成本**: 仅AI API用量付费
+
+### 架构优势
+- **零服务器成本** - Vercel免费托管
+- **按需付费** - 仅AI API调用付费
+- **快速迭代** - 纯前端，部署简单
+- **易于扩展** - 可逐步添加后端功能
 
 ### 开发工具
 - **代码质量**: ESLint, Prettier, TypeScript
@@ -124,12 +129,6 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - 项目主页: [https://github.com/Sniper1211/argue-trainer](https://github.com/Sniper1211/argue-trainer)
 - 问题反馈: [GitHub Issues](https://github.com/Sniper1211/argue-trainer/issues)
 - 功能建议: 通过Issue或Discussion提出
-
-## 🙏 致谢
-
-- 灵感来源: 小红书用户分享的"想找人帮忙练习吵架"需求
-- AI技术支持: DeepSeek AI
-- 开发方法论: Vibe Coding实践
 
 ---
 

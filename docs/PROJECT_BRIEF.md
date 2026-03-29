@@ -29,18 +29,19 @@ Next.js 14 (App Router)
 └── API客户端 (DeepSeek集成)
 ```
 
-### 后端架构
+### 架构设计（纯前端 + API代理）
 ```
-Next.js API Routes
-├── AI对话服务 (/api/chat)
-├── 用户管理 (/api/user)
-├── 训练历史 (/api/history)
-└── 场景管理 (/api/scenarios)
+Next.js App (Vercel托管)
+├── 前端页面 (app/*)
+├── API Routes (app/api/*) - 仅用于AI API代理
+└── 无数据库 - 本地存储或逐步添加
 ```
 
-### 数据流
+### 数据流（成本优化版）
 ```
-用户输入 → 前端界面 → API路由 → DeepSeek API → 逻辑分析 → 反馈输出
+用户输入 → 前端界面 → Next.js API Route（代理） → DeepSeek API → 返回前端
+      ↑
+  本地存储（localStorage）← 训练历史缓存
 ```
 
 ## 🚀 MVP功能清单
