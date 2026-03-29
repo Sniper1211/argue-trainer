@@ -1,112 +1,189 @@
-import ChatInterface from '@/components/ChatInterface'
-import ScenarioSelector from '@/components/ScenarioSelector'
-import TrainingStats from '@/components/TrainingStats'
+'use client'
 
-export default function HomePage() {
+import { useState } from 'react'
+
+export default function Home() {
+  const [input, setInput] = useState('')
+  const [messages, setMessages] = useState<Array<{role: string, content: string}>>([
+    { role: 'assistant', content: '你好！我是你的AI沟通陪练。今天想练习什么场景呢？' }
+  ])
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!input.trim() || loading) return
+
+    const userMessage = { role: 'user', content: input }
+    setMessages(prev => [...prev, userMessage])
+    setInput('')
+    setLoading(true)
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          scenario: 'workplace'
+        })
+      })
+
+      const data = await response.json()
+      if (data.message) {
+        setMessages(prev => [...prev, { role: 'assistant', content: data.message }])
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: '抱歉，服务暂时不可用。请稍后重试。' 
+      }])
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      <header className="border-b bg-white">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Argue Trainer</h1>
-              <p className="text-gray-600 mt-2">
-                AI吵架陪练 · 理性思辨与情绪控制训练平台
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                开始训练
-              </button>
-              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                训练历史
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <div className="max-w-4xl mx-auto">
+        {/* 头部 */}
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Argue Trainer</h1>
+          <p className="text-gray-600 mt-2">AI沟通训练 · 纯前端实现</p>
+        </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* 左侧：场景选择 */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-lg p-6 sticky top-8">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">训练场景</h2>
-              <ScenarioSelector />
-              
-              <div className="mt-8">
-                <h3 className="text-lg font-medium text-gray-700 mb-3">训练目标</h3>
-                <ul className="space-y-2">
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                    <span className="text-gray-600">逻辑思维训练</span>
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                    <span className="text-gray-600">情绪控制能力</span>
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
-                    <span className="text-gray-600">策略选择能力</span>
-                  </li>
-                </ul>
+        {/* 主内容 */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* 左侧信息 */}
+          <div className="lg:col-span-1 space-y-4">
+            <div className="bg-white rounded-lg shadow p-4">
+              <h2 className="font-semibold text-gray-800 mb-3">使用说明</h2>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li>• 输入你的回应，AI会模拟对话</li>
+                <li>• 练习职场、亲密关系等场景</li>
+                <li>• 提升逻辑思维和情绪控制</li>
+                <li>• 数据保存在本地，保护隐私</li>
+              </ul>
+            </div>
+
+            <div className="bg-white rounded-lg shadow p-4">
+              <h2 className="font-semibold text-gray-800 mb-3">技术栈</h2>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">Next.js</span>
+                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Tailwind</span>
+                <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">DeepSeek</span>
+                <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">Vercel</span>
               </div>
             </div>
           </div>
 
-          {/* 中间：对话界面 */}
+          {/* 聊天区域 */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <div className="p-6 border-b">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-800">AI陪练对话</h2>
-                    <p className="text-gray-600 text-sm mt-1">
-                      与AI模拟真实冲突场景，提升沟通能力
-                    </p>
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              {/* 消息区域 */}
+              <div className="h-96 overflow-y-auto p-4 space-y-4">
+                {messages.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                        msg.role === 'user'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      <div className="text-sm opacity-75 mb-1">
+                        {msg.role === 'user' ? '你' : 'AI陪练'}
+                      </div>
+                      <div className="whitespace-pre-wrap">{msg.content}</div>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
-                      在线
-                    </span>
+                ))}
+                {loading && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-100 text-gray-800 rounded-lg px-4 py-2">
+                      <div className="flex items-center">
+                        <div className="animate-pulse">思考中...</div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
-              
-              <ChatInterface />
+
+              {/* 输入区域 */}
+              <form onSubmit={handleSubmit} className="border-t p-4">
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="输入你的回应..."
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    disabled={loading}
+                  />
+                  <button
+                    type="submit"
+                    disabled={loading || !input.trim()}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? '发送中...' : '发送'}
+                  </button>
+                </div>
+                <div className="text-xs text-gray-500 mt-2">
+                  按Enter发送，Shift+Enter换行
+                </div>
+              </form>
             </div>
 
-            {/* 训练统计 */}
-            <div className="mt-8">
-              <TrainingStats />
+            {/* 快捷提示 */}
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                onClick={() => setInput('我觉得这个安排不太合理...')}
+                className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full transition"
+                disabled={loading}
+              >
+                示例1
+              </button>
+              <button
+                onClick={() => setInput('我能理解你的立场，但是...')}
+                className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full transition"
+                disabled={loading}
+              >
+                示例2
+              </button>
+              <button
+                onClick={() => setInput('这种情况下，我们应该...')}
+                className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full transition"
+                disabled={loading}
+              >
+                示例3
+              </button>
             </div>
           </div>
         </div>
-      </main>
 
-      <footer className="border-t bg-white mt-12">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <p className="text-gray-600">
-                © 2026 Argue Trainer. 基于Vibe Coding实践开发.
-              </p>
-            </div>
-            <div className="flex space-x-6">
-              <a href="#" className="text-gray-500 hover:text-gray-700">
-                使用指南
-              </a>
-              <a href="#" className="text-gray-500 hover:text-gray-700">
-                隐私政策
-              </a>
-              <a href="https://github.com/Sniper1211/argue-trainer" 
-                 className="text-gray-500 hover:text-gray-700">
-                GitHub
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+        {/* 页脚 */}
+        <footer className="mt-8 pt-6 border-t text-center text-gray-500 text-sm">
+          <p>纯前端实现 · AI API按量付费 · Vercel免费托管</p>
+          <p className="mt-1">
+            <a 
+              href="https://github.com/Sniper1211/argue-trainer" 
+              className="text-blue-600 hover:underline"
+            >
+              GitHub仓库
+            </a>
+            {' · '}
+            <a 
+              href="https://vercel.com" 
+              className="text-blue-600 hover:underline"
+            >
+              Vercel部署
+            </a>
+          </p>
+        </footer>
+      </div>
     </div>
   )
 }
